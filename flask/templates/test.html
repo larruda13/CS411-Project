@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IT'S MY WEBSITE WOW</title>
+</head>
+<body>
+<h1>Search for an Artist!</h1>
+<form action="/test" method="post">
+    <input type="text" name="artist">
+    <input type="submit" name="submit">
+</form>
+
+
+{% if x %}
+{% for item in x %}
+<p>{{ item }}</p>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>
