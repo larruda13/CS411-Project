@@ -47,7 +47,7 @@ The auth.json file will remain empty, and will not be submitted to GitHub. When 
 }
 ```
 
-[Idea based off of:](https://github.com/Data-Mechanics/course-2016-fal-proj)
+Idea based off of the section titled __Formatting the `auth.json` file__ from [here.](https://github.com/Data-Mechanics/course-2016-fal-proj)
 
 
 
