@@ -13,4 +13,5 @@ The goal of this project is to create a Youtube to Spotify converter using Flask
 * [Lucas Arruda](https://github.com/larruda13)
 
 First edit: Jennifer Tsui
+
 Most recent edit: Jennifer Tsui (11/22/16)
