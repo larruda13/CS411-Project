@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Choose Spotify Playlist</title>
+
+</head>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+
+<body class=" body">
+
+<body>
+
+<form name = "playlists" action="/spotifyplaylist" method = "POST" onsubmit="">
+<h1>Your Spotify Playlists</h1>
+{% for n in playlist_names %}
+<p><input type = "radio" name="user_choice" value ="{{ n }}">{{ n }}</p>
+{% endfor %}
+    <input type = "submit" name  = "confirm_choice" value = "Create YT Playlist">
+</form>
+
+</body>
+
+</body>
+</html>
