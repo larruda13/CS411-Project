@@ -1,20 +1,20 @@
 from flask import Flask, request, render_template
 import requests
 import json
-import spotify_call
 import time
 
 #-----------------------------------------------------------------------------------------------#
-"""
-app.py
+'''
+app.py (originally named 'hello.py')
 
 Purpose: Makes an API call to the Spotify API. Takes input based on a form (which prompts for
          an artist name), and returns a list of search results.
 Boston University CS411 - Software Engineering
 
 Originally written by: Jennifer Tsui (11-2-16)
-"""
+'''
 #-----------------------------------------------------------------------------------------------#
+
 
 app = Flask(__name__)
 
