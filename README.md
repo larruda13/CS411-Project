@@ -19,21 +19,21 @@ This web app seeks to automate the process of converting a playlist of songs hel
 
 ## Dependences
 
-# Frontend
+### Frontend
 
 * [AngularJS v2.2.0 (TENTATIVE)](https://angularjs.org/)
 * [Bootstrap v3.3.7](http://getbootstrap.com/)
 
-# Backend
+### Backend
 
 * [Flask v0.11.1](https://pypi.python.org/pypi/Flask)
 * [Google APIs Client Library for Python](https://developers.google.com/api-client-library/python/start/installation)
 
-# Database
+### Database
 
 * [Dataset (with SQLite3)](https://dataset.readthedocs.io/en/latest/)
 
-# External APIs
+### External APIs
 
 * [Spotify](https://developer.spotify.com/web-api/)
 * [YouTube Data API v3](https://developers.google.com/youtube/v3/)
