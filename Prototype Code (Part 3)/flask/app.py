@@ -5,7 +5,7 @@ import time
 
 #-----------------------------------------------------------------------------------------------#
 '''
-app.py (originally named 'hello.py'
+app.py (originally named 'hello.py')
 
 Purpose: Makes an API call to the Spotify API. Takes input based on a form (which prompts for
          an artist name), and returns a list of search results.
