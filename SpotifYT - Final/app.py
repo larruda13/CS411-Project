@@ -21,6 +21,7 @@ Boston University CS411 - Software Engineering
 Originally written by: Jiayuan Zheng
 Edited by: Jennifer Tsui (12-1-16; added '/oauth2callback' and '/youtube' approutes, added
                           authentication json files)
+           Jiayuan Zheng (12-2-16; added '/spotifyplaylist' updated '/youtube' approutes)
 """
 #-----------------------------------------------------------------------------------------------#
 app = Flask(__name__)
@@ -201,8 +202,8 @@ def spotifyplaylist():
         return render_template("spotify_playlist.html", playlist_names=playlist_names)
     elif request.method =='POST':
         p_name = str(request.form["user_choice"])
+        session["playlist_name"]=p_name
         playlist_id = playlist.get(p_name)
-        print(playlist_id)
         user = session.get("user", None)
         auth_header = session.get("auth_header", None)
         user_playlist_api_endpoint = "{}/playlists/{}/tracks".format(user, playlist_id)
@@ -226,14 +227,15 @@ def youtube():
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
+        playlist_name = session.get("playlist_name")
         http_auth = credentials.authorize(httplib2.Http())
         yt_service = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,http=credentials.authorize(httplib2.Http()))#,http_auth
         playlists_insert_response = yt_service.playlists().insert(
             part="snippet,status",
             body=dict(
                 snippet=dict(
-                    title="Test Playlist",
-                    description="Playlist created by SpotifYT from Spotify Playlist" + " " + ""
+                    title=playlist_name,
+                    description="Playlist created by SpotifYT from Spotify Playlist" + " " + playlist_name
                 ),
                 status=dict(
                     privacyStatus="public"
@@ -248,8 +250,8 @@ def youtube():
 @app.route("/oauth2callback")
 def oauth2callback():
     flow = client.flow_from_clientsecrets(
-      #'auth.json',
       'client_secrets.json',
+      message=MISSING_CLIENT_SECRETS_MESSAGE,
       scope=YOUTUBE_READ_WRITE_SCOPE,
       redirect_uri=url_for('oauth2callback', _external=True))
     if 'code' not in request.args:
@@ -262,60 +264,6 @@ def oauth2callback():
         return redirect(url_for('youtube'))
 
 '''
-@app.route("/youtube2")
-def youtube():
-    if 'credentials' not in session:
-        return redirect(url_for('oauth2callback'))
-    credentials = client.OAuth2Credentials.from_json(session['credentials'])
-    if credentials.access_token_expired:
-        return redirect(url_for('oauth2callback'))
-    else:
-        http_auth = credentials.authorize(httplib2.Http())
-        youtube = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-                        http=credentials.authorize(httplib2.Http()))
-
-        # This code creates a new, private playlist in the authorized user's channel.
-        playlists_insert_response = youtube.playlists().insert(
-            part="snippet,status",
-            body=dict(
-                snippet=dict(
-                    title="Test Playlist",
-                    description="A private playlist created with the YouTube API v3"
-                ),
-                status=dict(
-                    privacyStatus="private"
-                )
-            )
-        ).execute()
-
-        print("New playlist id: %s" % playlists_insert_response["id"])
-        return json.dumps(files)
-
-@app.route("/oauth2callback2")
-def oauth2callbackTEST():
-    flow = client.flow_from_clientsecrets(CLIENT_SECRETS_FILE,
-                                   message=MISSING_CLIENT_SECRETS_MESSAGE,
-                                   scope=YOUTUBE_READ_WRITE_SCOPE,
-                                   redirect_uri=url_for('oauth2callbackTEST', _external=True))
-    if 'code' not in request.args:
-        auth_uri = flow.step1_get_authorize_url()
-        return redirect(auth_uri)
-    else:
-        auth_code = request.args.get('code')
-        credentials = flow.step2_exchange(auth_code)
-        session['credentials'] = credentials.to_json()
-        return redirect(url_for('youtube'))
-
-# --------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
 
 storage = Storage("%s-oauth2.json" % sys.argv[0])
 credentials = storage.get()
@@ -324,17 +272,6 @@ if credentials is None or credentials.invalid:
   flags = argparser.parse_args()
   credentials = run_flow(flow, storage, flags)
 
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------
 '''
 if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
