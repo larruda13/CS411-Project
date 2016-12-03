@@ -1,5 +1,5 @@
 import json
-from flask import Flask, request, redirect, session, render_template, url_for, make_response
+from flask import Flask, request, redirect, session, render_template, url_for, make_response, flash
 import requests
 import base64
 import urllib.parse
@@ -191,7 +191,7 @@ def callback():
 
 
 
-    return redirect(url_for("spotifyplaylist"))
+    return (redirect(url_for("spotifyplaylist")))
 
 
 @app.route("/spotifyplaylist", methods=['POST', 'GET'])
@@ -215,11 +215,18 @@ def spotifyplaylist():
         for j in range(len(user_playlist["items"])):
             song[user_playlist["items"][j]["track"]["name"]] = user_playlist["items"][j]["track"]["artists"][0]["name"]
 
-
+        song_information= []
+        for m in range(len(user_playlist["items"])):
+            song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] + " " +user_playlist["items"][m]["track"]["album"]["name"]]
+        print(song_information)
+        session["song_options"] = song_information
 
         return (redirect("/youtube"))
 
-@app.route("/youtube")
+
+DEVELOPER_KEY = "AIzaSyCGlSgjdpAqT3OhwsdPEch-21vVJuSqKHs" #add the google api key
+
+@app.route("/youtube", methods = ['GET','POST'])
 def youtube():
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
@@ -235,7 +242,7 @@ def youtube():
             body=dict(
                 snippet=dict(
                     title=playlist_name,
-                    description="Playlist created by SpotifYT from Spotify Playlist" + " " + playlist_name
+                    description="Playlist created by SpotifYT from my Spotify Playlist" + " " + "(" + playlist_name + ")"
                 ),
                 status=dict(
                     privacyStatus="public"
@@ -243,8 +250,49 @@ def youtube():
             )
         ).execute()
 
-        print("New playlist id: %s" % playlists_insert_response["id"])
-        return ("hello")
+        ytplaylist_id = playlists_insert_response["id"]
+
+        yt_playlist_url = "https://www.youtube.com/playlist?list=" + ytplaylist_id
+
+        song_options = session.get("song_options")
+
+        youtube = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
+                                  developerKey=DEVELOPER_KEY)
+        # search for the most viewed video of songs in the playlist
+        video_ids = []
+        for n in range(len(song_options)):
+
+            search_response = youtube.search().list(
+                q=song_options[n],
+                part="id,snippet",
+                maxResults=10).execute()
+
+            for search_result in search_response.get("items",[]):
+
+                if search_result["id"]["kind"] == "youtube#video":
+                    v_id = search_result["id"]["videoId"]
+                    video_ids += [v_id]
+                    break
+
+
+        for x in video_ids:
+            add_video_request = yt_service.playlistItems().insert(
+                part="snippet",
+                body={
+                    'snippet': {
+                        'playlistId': ytplaylist_id,
+                        'resourceId': {
+                            'kind': 'youtube#video',
+                            'videoId': x
+                        }
+
+
+                    }
+                }).execute()
+
+
+    return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url))
+
 
 
 @app.route("/oauth2callback")
@@ -263,6 +311,11 @@ def oauth2callback():
         session['credentials'] = credentials.to_json()
         return redirect(url_for('youtube'))
 
+
+
+
+
+
 '''
 
 storage = Storage("%s-oauth2.json" % sys.argv[0])
@@ -277,4 +330,3 @@ if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
 
-#eof
