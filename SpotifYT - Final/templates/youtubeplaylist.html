@@ -3,9 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>SpotifYT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+    body{background: #2f2f2f; color: white; margin-left: 48px; font-family: "Helvetica Neue"}
+    h1{margin-bottom: 48px}
+    </style>
 </head>
 <body>
+<div class="container">
 <h1>YouTube Playlist is Created!</h1>
-<h2><a href = "{{ youtube_url }}">Click to check it out on YouTube</a></h2>
+<h2><a href = "{{ youtube_url }}" class="btn btn-success" role="button">Click to check it out on YouTube</a></h2>
+    </div>
 </body>
 </html>
