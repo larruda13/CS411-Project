@@ -9,6 +9,8 @@
 <style>
     body{background: #2f2f2f; color: white; margin-left: 48px; font-family: "Helvetica Neue"}
     h1{margin-bottom: 48px}
+    h3{margin-bottom: 20px}
+    .btn{position:fixed; margin-top: 250px; margin-right: 10px; color:white; background-color:#4CAF50;font-size: 36px;}
 
 </style>
 </head>
@@ -19,11 +21,17 @@
 <body>
 <div class="container">
 <form name = "playlists" action="/spotifyplaylist" method = "POST" onsubmit="">
+ <div class="row">
+ <div class="col-sm-7">
 <h1>Your Spotify Playlists</h1>
+ <h3>Choose a Playlist:</h3>
 {% for n in playlist_names %}
 <p><input type = "radio" name="user_choice" value ="{{ n }}"> <span class="glyphicon glyphicon-music"></span>  {{ n }}</p>
 {% endfor %}
-    <input type = "submit" class="btn btn-success" name  = "confirm_choice" value = "Create YT Playlist">
+ </div>
+  <div class="col-sm-5">
+    <h2><input type = "submit" class="btn btn-success" name  = "confirm_choice" value = "Create YT Playlist"></h2>
+       </div>
 </form>
 </div>
 </body>
