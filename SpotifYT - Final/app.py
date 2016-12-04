@@ -8,6 +8,10 @@ from apiclient import discovery
 from oauth2client import client
 import httplib2
 import os
+
+
+
+
 import sys
 from apiclient.errors import HttpError
 from oauth2client.file import Storage
@@ -25,6 +29,8 @@ Edited by: Jennifer Tsui (12-1-16; added '/oauth2callback' and '/youtube' approu
 """
 #-----------------------------------------------------------------------------------------------#
 app = Flask(__name__)
+
+
 
 # Client side
 CLIENT_SIDE_URL = "http://127.0.0.1"
@@ -114,6 +120,10 @@ yt_auth_query_parameters = {
     "scope": YOUTUBE_READ_WRITE_SCOPE,
     "client_id": YT_CLIENT_ID
 }
+
+
+
+
 
 @app.route("/spotify")
 def spotify():
@@ -217,7 +227,7 @@ def spotifyplaylist():
 
         song_information= []
         for m in range(len(user_playlist["items"])):
-            song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] + " " +user_playlist["items"][m]["track"]["album"]["name"]]
+            song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] ]
         print(song_information)
         session["song_options"] = song_information
 
@@ -267,12 +277,15 @@ def youtube():
                 part="id,snippet",
                 maxResults=10).execute()
 
+
             for search_result in search_response.get("items",[]):
 
-                if search_result["id"]["kind"] == "youtube#video":
-                    v_id = search_result["id"]["videoId"]
-                    video_ids += [v_id]
-                    break
+
+                    if search_result["id"]["kind"] == "youtube#video":
+                        v_id = search_result["id"]["videoId"]
+                        video_ids += [v_id]
+                        break
+
 
 
         for x in video_ids:
