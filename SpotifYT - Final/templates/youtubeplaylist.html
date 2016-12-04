@@ -10,13 +10,15 @@
 <style>
     body{background: #2f2f2f; color: white; margin-left: 48px; font-family: "Helvetica Neue"}
     h1{margin-bottom: 48px}
+    p{margin-top: 25px; position:absolute; right: 1px;}
     </style>
 </head>
 <body>
 <div class="container">
-<h1>YouTube Playlist is Created!</h1>
-<h2><a href = "{{ youtube_url }}" class="btn btn-success" role="button">Click to check it out on YouTube</a></h2>
-    <h2><a href = "/spotifyplaylist" class="btn btn-success" role="button">Click to start over</a></h2>
-    </div>
+    <div class="row">
+  <div class="col-sm-8"><h1>YouTube Playlist is Created!</h1><h2><a href = "{{ youtube_url }}" class="btn btn-success" role="button">Click to check it out on YouTube</a></h2></div>
+  <div class="col-sm-4"><p><a href = "/spotifyplaylist" class="btn btn-success" role="button">Click to go back to Playlist selection</a></p></div>
+</div>
+
 </body>
 </html>
