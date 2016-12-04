@@ -221,7 +221,7 @@ def spotifyplaylist():
         return (redirect("/youtube"))
 
 
-DEVELOPER_KEY = "AIzaSyCGlSgjdpAqT3OhwsdPEch-21vVJuSqKHs" #add the google api key
+DEVELOPER_KEY = "" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
@@ -310,16 +310,12 @@ def oauth2callback():
         return redirect(url_for('youtube'))
 
 '''
-
 storage = Storage("%s-oauth2.json" % sys.argv[0])
 credentials = storage.get()
-
 if credentials is None or credentials.invalid:
   flags = argparser.parse_args()
   credentials = run_flow(flow, storage, flags)
-
 '''
 if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
-
