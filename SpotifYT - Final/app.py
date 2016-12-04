@@ -12,7 +12,6 @@ import sys
 from apiclient.errors import HttpError
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
-import dataset
 
 #-----------------------------------------------------------------------------------------------#
 """
@@ -100,10 +99,12 @@ SHOW_DIALOG_str = str(SHOW_DIALOG_bool).lower()
 YT_REDIRECT_URI = "{}:{}/youtube/callback".format(CLIENT_SIDE_URL,PORT,YOUTUBE_CALLBACK)
 
 sp_auth_query_parameters = {
+
     "response_type": "code",
     "redirect_uri": SP_REDIRECT_URI,
     "scope": SP_SCOPE,
     "client_id": SP_CLIENT_ID
+
 }
 
 yt_auth_query_parameters = {
@@ -113,9 +114,6 @@ yt_auth_query_parameters = {
     "client_id": YT_CLIENT_ID
 }
 
-db = dataset.connect('sqlite:///mydatabase.db')
-
-table = db['userinfo']
 
 
 
@@ -164,20 +162,19 @@ def callback():
 
     user_id = profile_data["id"]
 
-    #print(profile_data)
+
 
     # Get user playlist data
     playlist_api_endpoint = "{}/playlists".format(profile_data["href"])
     playlists_response = requests.get(playlist_api_endpoint, headers=authorization_header)
     playlists = playlists_response.json()
 
-
     p = {}
     p_names = []
 
     for i in range(len(playlists["items"])):
         p[playlists["items"][i]["name"]] = playlists["items"][i]["id"]
-    print(p)
+    #print(p)
 
     for item in p.keys():
         name = item
@@ -216,6 +213,7 @@ def spotifyplaylist():
 
 
         song = {}
+        print()
         for j in range(len(user_playlist["items"])):
             song[user_playlist["items"][j]["track"]["name"]] = user_playlist["items"][j]["track"]["artists"][0]["name"]
 
@@ -229,7 +227,7 @@ def spotifyplaylist():
 
 
 
-DEVELOPER_KEY = "" #add the google api key
+DEVELOPER_KEY = "AIzaSyCGlSgjdpAqT3OhwsdPEch-21vVJuSqKHs" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
