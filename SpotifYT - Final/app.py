@@ -221,7 +221,7 @@ def spotifyplaylist():
         return (redirect("/youtube"))
 
 
-DEVELOPER_KEY = "" #add the google api key
+DEVELOPER_KEY = "AIzaSyCGlSgjdpAqT3OhwsdPEch-21vVJuSqKHs" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
