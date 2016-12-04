@@ -12,6 +12,7 @@ import sys
 from apiclient.errors import HttpError
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
+import dataset
 
 #-----------------------------------------------------------------------------------------------#
 """
@@ -111,6 +112,12 @@ yt_auth_query_parameters = {
     "scope": YOUTUBE_READ_WRITE_SCOPE,
     "client_id": YT_CLIENT_ID
 }
+
+db = dataset.connect('sqlite:///:memory:')
+
+table = db['userinfo']
+
+
 
 @app.route("/spotify")
 def spotify():
@@ -221,6 +228,7 @@ def spotifyplaylist():
         return (redirect("/youtube"))
 
 
+
 DEVELOPER_KEY = "AIzaSyCGlSgjdpAqT3OhwsdPEch-21vVJuSqKHs" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
@@ -291,6 +299,7 @@ def youtube():
                 }).execute()
 
     return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url))
+
 
 
 @app.route("/oauth2callback")
