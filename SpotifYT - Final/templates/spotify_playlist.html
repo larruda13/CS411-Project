@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Choose Spotify Playlist</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+    body{background: #2f2f2f; color: white; margin-left: 48px; font-family: "Helvetica Neue"}
+    h1{margin-bottom: 48px}
 
+
+</style>
 </head>
 <link href="css/bootstrap.min.css" rel="stylesheet">
 
@@ -14,9 +22,9 @@
 <form name = "playlists" action="/spotifyplaylist" method = "POST" onsubmit="">
 <h1>Your Spotify Playlists</h1>
 {% for n in playlist_names %}
-<p><input type = "radio" name="user_choice" value ="{{ n }}">{{ n }}</p>
+<p><input type = "radio" name="user_choice" value ="{{ n }}"> <span class="glyphicon glyphicon-music"></span>  {{ n }}</p>
 {% endfor %}
-    <input type = "submit" name  = "confirm_choice" value = "Create YT Playlist">
+    <input type = "submit" class="btn btn-success" name  = "confirm_choice" value = "Create YT Playlist">
 </form>
 
 </body>
