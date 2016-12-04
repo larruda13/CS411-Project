@@ -16,7 +16,10 @@
 <body>
 <div class="container">
     <div class="row">
-  <div class="col-sm-8"><h1>YouTube Playlist is Created!</h1><h2><a href = "{{ youtube_url }}" class="btn btn-success" role="button">Click to check it out on YouTube</a></h2></div>
+  <div class="col-sm-8"><h1>YouTube Playlist is Created!</h1>
+
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list={{ id }}" frameborder="0" allowfullscreen></iframe>
+      <h2><a href = "{{ youtube_url }}" class="btn btn-success" role="button">Click to check it out on YouTube</a></h2></div>
   <div class="col-sm-4"><p><a href = "/spotifyplaylist" class="btn btn-success" role="button">Click to go back to Playlist selection</a></p></div>
 </div>
 

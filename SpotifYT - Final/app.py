@@ -113,7 +113,7 @@ yt_auth_query_parameters = {
     "client_id": YT_CLIENT_ID
 }
 
-db = dataset.connect('sqlite:///:memory:')
+db = dataset.connect('sqlite:///mydatabase.db')
 
 table = db['userinfo']
 
@@ -298,7 +298,7 @@ def youtube():
                     }
                 }).execute()
 
-    return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url))
+    return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url, id= ytplaylist_id))
 
 
 
