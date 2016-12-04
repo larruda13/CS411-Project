@@ -1,4 +1,4 @@
-# CS411-Project
+# SpotifYT
 
 Project repository for the course project in the Fall 2016 iteration of the Software Engineering course at Boston University.
 
@@ -38,18 +38,22 @@ This web app seeks to automate the process of converting a playlist of songs hel
 * [Spotify](https://developer.spotify.com/web-api/)
 * [YouTube Data API v3](https://developers.google.com/youtube/v3/)
 
+## Running the app in SpotifYT - Final
 
-## Running the software
+To be completed later.
 
-Run `hello.py`. Note that we are developing with Python 3.5.2.
-From there, the output should say something like this:
+## Running the app in Prototype Code (Part 3)/flask
+
+Run `app.py` (which was formerly called `hello.py`). 
 
 ```
 * Running on http://127.0.0.1:5000/
 ```
 
-In this case, you would want to go to `http://localhost:5000/test` in your browser to see the resulting web app.
+In this case, you would go to `http://localhost:5000/test` in your browser to see the resulting web app.
 As of 11/01/16, all our app does is send an API request to Spotify. What it returns is a full list of the artist names that match with the search term that was input into the form. We plan to add authorization to the API calls.
+
+---
 
 First edit: Jennifer Tsui (11/01/16)
 
