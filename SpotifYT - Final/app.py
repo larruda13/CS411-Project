@@ -8,6 +8,7 @@ from apiclient import discovery
 from oauth2client import client
 import httplib2
 import os
+import dataset
 import sys
 from apiclient.errors import HttpError
 from oauth2client.file import Storage
@@ -25,6 +26,7 @@ Edited by: Jennifer Tsui (12-1-16; added '/oauth2callback' and '/youtube' approu
 """
 #-----------------------------------------------------------------------------------------------#
 app = Flask(__name__)
+
 
 # Client side
 CLIENT_SIDE_URL = "http://127.0.0.1"
@@ -85,6 +87,7 @@ YOUTUBE_TOKEN_URL = ""
 YOUTUBE_API_BASE_URL = "GET https://www.googleapis.com/youtube"
 #YOUTUBE_API_URL = "{}/{}".format(YOUTUBE_API_BASE_URL,YT_API_VERSION)
 YOUTUBE_CALLBACK = "callback"
+DEVELOPER_KEY = client_secr['web']['developer_key']
 
 
 # Spotify Server-side Parameters
@@ -111,6 +114,12 @@ yt_auth_query_parameters = {
     "scope": YOUTUBE_READ_WRITE_SCOPE,
     "client_id": YT_CLIENT_ID
 }
+
+@app.route("/", methods = ['GET','POST'])
+def index():
+    return render_template("welcome.html")
+
+
 
 @app.route("/spotify")
 def spotify():
@@ -156,6 +165,10 @@ def callback():
     profile_data = profile_response.json()
 
     user_id = profile_data["id"]
+    session["spotify_id"] = user_id
+
+
+
 
     #print(profile_data)
 
@@ -221,7 +234,6 @@ def spotifyplaylist():
         return (redirect("/youtube"))
 
 
-DEVELOPER_KEY = "" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
@@ -231,6 +243,11 @@ def youtube():
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
+        spotify_id = session.get("spotify_id")
+
+        db = dataset.connect('sqlite:///mydatabase.db')
+        table = db["user_info"]
+
         playlist_name = session.get("playlist_name")
         http_auth = credentials.authorize(httplib2.Http())
         yt_service = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,http=credentials.authorize(httplib2.Http()))#,http_auth
@@ -246,6 +263,28 @@ def youtube():
                 )
             )
         ).execute()
+
+        channels_list = yt_service.channels().list(
+            part="snippet",
+            mine=True
+        ).execute()
+
+        channel = channels_list.get("items",[])
+
+        chan_id = str([chan["id"] for chan in channel][0])
+
+        if len(table) == 0: # insert first user
+            table.insert(dict(spotify_id=spotify_id, youtube_id=chan_id, counts=1))
+        elif table.find(spotify_id = spotify_id, youtube_id = chan_id) != {}:
+            result = table.find_one(spotify_id = spotify_id)
+            s_id = result["spotify_id"]
+            y_id = result["youtube_id"]
+            old_counts = result["counts"]
+            new_counts = old_counts + 1
+            table.update(dict(spotify_id = s_id, youtube_id = y_id, counts = new_counts),["spotify_id","youtube_id"])
+        else:
+            table.insert(dict(spotify_id=spotify_id, youtube_id = chan_id,counts = 1))
+
 
         ytplaylist_id = playlists_insert_response["id"]
 
@@ -273,8 +312,6 @@ def youtube():
                         video_ids += [v_id]
                         break
 
-
-
         for x in video_ids:
             add_video_request = yt_service.playlistItems().insert(
                 part="snippet",
@@ -289,6 +326,8 @@ def youtube():
 
                     }
                 }).execute()
+
+
 
     return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url))
 
@@ -309,13 +348,6 @@ def oauth2callback():
         session['credentials'] = credentials.to_json()
         return redirect(url_for('youtube'))
 
-'''
-storage = Storage("%s-oauth2.json" % sys.argv[0])
-credentials = storage.get()
-if credentials is None or credentials.invalid:
-  flags = argparser.parse_args()
-  credentials = run_flow(flow, storage, flags)
-'''
 if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
