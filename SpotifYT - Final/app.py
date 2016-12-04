@@ -26,8 +26,6 @@ Edited by: Jennifer Tsui (12-1-16; added '/oauth2callback' and '/youtube' approu
 #-----------------------------------------------------------------------------------------------#
 app = Flask(__name__)
 
-
-
 # Client side
 CLIENT_SIDE_URL = "http://127.0.0.1"
 PORT = 8080
@@ -99,9 +97,6 @@ SHOW_DIALOG_str = str(SHOW_DIALOG_bool).lower()
 
 #YouTube Server-side Parameters
 YT_REDIRECT_URI = "{}:{}/youtube/callback".format(CLIENT_SIDE_URL,PORT,YOUTUBE_CALLBACK)
-
-
-
 
 sp_auth_query_parameters = {
     "response_type": "code",
@@ -219,12 +214,8 @@ def spotifyplaylist():
 
         song_information= []
         for m in range(len(user_playlist["items"])):
-
             song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] ]
 
-            song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] + " " +user_playlist["items"][m]["track"]["album"]["name"]]
-
-        print(song_information)
         session["song_options"] = song_information
 
         return (redirect("/youtube"))
@@ -274,13 +265,14 @@ def youtube():
                 maxResults=10).execute()
 
 
-
             for search_result in search_response.get("items",[]):
 
-                if search_result["id"]["kind"] == "youtube#video":
-                    v_id = search_result["id"]["videoId"]
-                    video_ids += [v_id]
-                    break
+
+                    if search_result["id"]["kind"] == "youtube#video":
+                        v_id = search_result["id"]["videoId"]
+                        video_ids += [v_id]
+                        break
+
 
 
         for x in video_ids:
@@ -298,9 +290,7 @@ def youtube():
                     }
                 }).execute()
 
-
     return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url))
-
 
 
 @app.route("/oauth2callback")
@@ -320,17 +310,12 @@ def oauth2callback():
         return redirect(url_for('youtube'))
 
 '''
-
-
 storage = Storage("%s-oauth2.json" % sys.argv[0])
 credentials = storage.get()
-
 if credentials is None or credentials.invalid:
   flags = argparser.parse_args()
   credentials = run_flow(flow, storage, flags)
-
 '''
 if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
-
