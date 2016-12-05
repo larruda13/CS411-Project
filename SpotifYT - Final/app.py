@@ -12,6 +12,7 @@ import sys
 from apiclient.errors import HttpError
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
+import dataset
 
 #-----------------------------------------------------------------------------------------------#
 """
@@ -85,6 +86,7 @@ YOUTUBE_TOKEN_URL = ""
 YOUTUBE_API_BASE_URL = "GET https://www.googleapis.com/youtube"
 #YOUTUBE_API_URL = "{}/{}".format(YOUTUBE_API_BASE_URL,YT_API_VERSION)
 YOUTUBE_CALLBACK = "callback"
+DEVELOPER_KEY = client_secr['web']['developer_key']
 
 
 # Spotify Server-side Parameters
@@ -114,6 +116,10 @@ yt_auth_query_parameters = {
     "client_id": YT_CLIENT_ID
 }
 
+
+@app.route("/", methods = ['GET','POST'])
+def index():
+   return render_template("welcome.html")
 
 
 
@@ -161,7 +167,7 @@ def callback():
     profile_data = profile_response.json()
 
     user_id = profile_data["id"]
-
+    session["spotify_id"] = user_id
 
 
     # Get user playlist data
@@ -227,7 +233,6 @@ def spotifyplaylist():
 
 
 
-DEVELOPER_KEY = "" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
@@ -237,6 +242,10 @@ def youtube():
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
+        spotify_id = session.get("spotify_id")
+
+        db = dataset.connect('sqlite:///mydatabase.db')
+        table = db["user_info"]
         playlist_name = session.get("playlist_name")
         http_auth = credentials.authorize(httplib2.Http())
         yt_service = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,http=credentials.authorize(httplib2.Http()))#,http_auth
@@ -253,17 +262,41 @@ def youtube():
             )
         ).execute()
 
-        ytplaylist_id = playlists_insert_response["id"]
 
-        yt_playlist_url = "https://www.youtube.com/playlist?list=" + ytplaylist_id
+    channels_list = yt_service.channels().list(
+                part = "snippet",
+                 mine = True
+                  ).execute()
 
-        song_options = session.get("song_options")
+    channel = channels_list.get("items", [])
 
-        youtube = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
+    chan_id = str([chan["id"] for chan in channel][0])
+
+
+    if len(table) == 0:  # insert first user
+               table.insert(dict(spotify_id=spotify_id, youtube_id=chan_id, counts=1))
+    elif table.find(spotify_id=spotify_id, youtube_id=chan_id) != {}:
+            result = table.find_one(spotify_id=spotify_id)
+            s_id = result["spotify_id"]
+            y_id = result["youtube_id"]
+            old_counts = result["counts"]
+            new_counts = old_counts + 1
+            table.update(dict(spotify_id=s_id, youtube_id=y_id, counts=new_counts), ["spotify_id", "youtube_id"])
+    else:
+            table.insert(dict(spotify_id=spotify_id, youtube_id=chan_id, counts=1))
+
+
+    ytplaylist_id = playlists_insert_response["id"]
+
+    yt_playlist_url = "https://www.youtube.com/playlist?list=" + ytplaylist_id
+
+    song_options = session.get("song_options")
+
+    youtube = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
                                   developerKey=DEVELOPER_KEY)
-        # search for the most viewed video of songs in the playlist
-        video_ids = []
-        for n in range(len(song_options)):
+    # search for the most viewed video of songs in the playlist
+    video_ids = []
+    for n in range(len(song_options)):
 
             search_response = youtube.search().list(
                 q=song_options[n],
@@ -281,8 +314,8 @@ def youtube():
 
 
 
-        for x in video_ids:
-            add_video_request = yt_service.playlistItems().insert(
+            for x in video_ids:
+                add_video_request = yt_service.playlistItems().insert(
                 part="snippet",
                 body={
                     'snippet': {
@@ -316,13 +349,7 @@ def oauth2callback():
         session['credentials'] = credentials.to_json()
         return redirect(url_for('youtube'))
 
-'''
-storage = Storage("%s-oauth2.json" % sys.argv[0])
-credentials = storage.get()
-if credentials is None or credentials.invalid:
-  flags = argparser.parse_args()
-  credentials = run_flow(flow, storage, flags)
-'''
+
 if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
