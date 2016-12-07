@@ -8,28 +8,6 @@ from apiclient import discovery
 from oauth2client import client
 import httplib2
 import os
-<<<<<<< HEAD
-
-
-
-
-=======
->>>>>>> bb76e9aa146db7eb424fc09b6d2bcb7aec73307d
-import sys
-from apiclient.errors import HttpError
-from oauth2client.file import Storage
-from oauth2client.tools import argparser, run_flow
-
-import json
-from flask import Flask, request, redirect, session, render_template, url_for, make_response, flash
-import requests
-import base64
-import urllib.parse
-import uuid
-from apiclient import discovery
-from oauth2client import client
-import httplib2
-import os
 import sys
 from apiclient.errors import HttpError
 from oauth2client.file import Storage
@@ -242,11 +220,9 @@ def spotifyplaylist():
 
         song_information= []
         for m in range(len(user_playlist["items"])):
-<<<<<<< HEAD
+
             song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] ]
-=======
-            song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] + " " +user_playlist["items"][m]["track"]["album"]["name"]]
->>>>>>> bb76e9aa146db7eb424fc09b6d2bcb7aec73307d
+
         print(song_information)
         session["song_options"] = song_information
 
