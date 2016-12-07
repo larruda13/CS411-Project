@@ -20,6 +20,21 @@ from apiclient.errors import HttpError
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 
+import json
+from flask import Flask, request, redirect, session, render_template, url_for, make_response, flash
+import requests
+import base64
+import urllib.parse
+import uuid
+from apiclient import discovery
+from oauth2client import client
+import httplib2
+import os
+import sys
+from apiclient.errors import HttpError
+from oauth2client.file import Storage
+from oauth2client.tools import argparser, run_flow
+
 #-----------------------------------------------------------------------------------------------#
 """
 app.py
@@ -124,13 +139,7 @@ yt_auth_query_parameters = {
     "client_id": YT_CLIENT_ID
 }
 
-<<<<<<< HEAD
 
-
-
-
-=======
->>>>>>> bb76e9aa146db7eb424fc09b6d2bcb7aec73307d
 @app.route("/spotify")
 def spotify():
     # Authorization
@@ -286,25 +295,12 @@ def youtube():
                 q=song_options[n],
                 part="id,snippet",
                 maxResults=10).execute()
-
-<<<<<<< HEAD
-
-            for search_result in search_response.get("items",[]):
-
-
-                    if search_result["id"]["kind"] == "youtube#video":
-                        v_id = search_result["id"]["videoId"]
-                        video_ids += [v_id]
-                        break
-
-=======
             for search_result in search_response.get("items",[]):
 
                 if search_result["id"]["kind"] == "youtube#video":
                     v_id = search_result["id"]["videoId"]
                     video_ids += [v_id]
                     break
->>>>>>> bb76e9aa146db7eb424fc09b6d2bcb7aec73307d
 
 
         for x in video_ids:
@@ -345,11 +341,7 @@ def oauth2callback():
 
 
 
-
-
-
 '''
-<<<<<<< HEAD
 
 storage = Storage("%s-oauth2.json" % sys.argv[0])
 credentials = storage.get()
@@ -363,14 +355,3 @@ if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
 
-=======
-storage = Storage("%s-oauth2.json" % sys.argv[0])
-credentials = storage.get()
-if credentials is None or credentials.invalid:
-  flags = argparser.parse_args()
-  credentials = run_flow(flow, storage, flags)
-'''
-if __name__ == "__main__":
-    app.secret_key = str(uuid.uuid4())
-    app.run(debug=True,port=PORT)
->>>>>>> bb76e9aa146db7eb424fc09b6d2bcb7aec73307d
