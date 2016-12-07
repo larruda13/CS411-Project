@@ -52,7 +52,6 @@ After doing that, you would see something like this:
  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
  * Restarting with stat
  * Debugger is active!
-
 ```
 
 From there, go to `http://127.0.0.1:8080/` in your preferred web browser!
@@ -73,4 +72,4 @@ As of 11/01/16, all our app does is send an API request to Spotify. What it retu
 
 First edit: Jennifer Tsui (11/01/16)
 
-Most recent edit: Jennifer Tsui (12/02/16)
+Most recent edit: Jennifer Tsui (12/07/16)
