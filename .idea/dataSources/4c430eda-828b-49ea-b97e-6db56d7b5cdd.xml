@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="Sqlite (Xerial) - mydatabase.db">
+  <database-model serializer="dbm" rdbms="SQLITE" format-version="2.6">
+    <schema id="1">
+      <visible>1</visible>
+    </schema>
+    <table id="2" parent="1" name="user_info"/>
+    <table id="3" parent="1" name="userinfo"/>
+    <column id="4" parent="2" name="id">
+      <mandatory>1</mandatory>
+      <data-type>INTEGER(0,-1)|4</data-type>
+    </column>
+    <column id="5" parent="2" name="counts">
+      <data-type>INTEGER(0,-1)|4</data-type>
+    </column>
+    <column id="6" parent="2" name="spotify_id">
+      <data-type>TEXT(0,-1)|12</data-type>
+    </column>
+    <column id="7" parent="2" name="youtube_id">
+      <data-type>TEXT(0,-1)|12</data-type>
+    </column>
+    <key id="8" parent="2">
+      <columns>id</columns>
+      <primary>1</primary>
+    </key>
+    <column id="9" parent="3" name="id">
+      <mandatory>1</mandatory>
+      <data-type>INTEGER(0,-1)|4</data-type>
+    </column>
+    <key id="10" parent="3">
+      <columns>id</columns>
+      <primary>1</primary>
+    </key>
+  </database-model>
+</dataSource>
