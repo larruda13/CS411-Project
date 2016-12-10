@@ -136,14 +136,12 @@ def callback():
     headers = {"Authorization": "Basic {}".format(new_encode)}
     post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload, headers=headers)
 
-    # Tokens are Returned to Application
     response_data = json.loads(post_request.text)
     access_token = response_data["access_token"]
     refresh_token = response_data["refresh_token"]
     token_type = response_data["token_type"]
     expires_in = response_data["expires_in"]
 
-    #Use the access token to access Spotify API
     authorization_header = {"Authorization":"Bearer {}".format(access_token)}
 
     user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
@@ -209,15 +207,12 @@ def spotifyplaylist():
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
-
-
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
     credentials = client.OAuth2Credentials.from_json(session['credentials'])
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
-
         spotify_id = session.get("spotify_id")
         db = dataset.connect('sqlite:///mydatabase.db')
         table = db["user_info"]
@@ -296,13 +291,8 @@ def youtube():
                             'kind': 'youtube#video',
                             'videoId': x
                         }
-
-
                     }
                 }).execute()
-
-
-
 
         return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url, id = ytplaylist_id))
 
@@ -313,18 +303,12 @@ def oauth2callback():
       'client_secrets.json',
       message=MISSING_CLIENT_SECRETS_MESSAGE,
       scope=YOUTUBE_READ_WRITE_SCOPE,
-
       redirect_uri=url_for('oauth2callback', _external=True))
-
-
-
     if 'code' not in request.args:
         auth_uri = flow.step1_get_authorize_url()
         return redirect(auth_uri)
     else:
-
         auth_code = request.args.get('code')
-
         credentials = flow.step2_exchange(auth_code)
         session['credentials'] = credentials.to_json()
         return redirect(url_for('youtube'))
