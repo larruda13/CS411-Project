@@ -1,5 +1,5 @@
 import json
-from flask import Flask, request, redirect, session, render_template, url_for, make_response, flash
+from flask import Flask, request, redirect, session, render_template, url_for
 import requests
 import base64
 import urllib.parse
@@ -8,24 +8,23 @@ from apiclient import discovery
 from oauth2client import client
 import httplib2
 import os
-import sys
-from apiclient.errors import HttpError
-from oauth2client.file import Storage
-from oauth2client.tools import argparser, run_flow
+import dataset
+
 
 #-----------------------------------------------------------------------------------------------#
 """
 app.py
 Purpose: This is the guts of our web app. In particular, this is the backend of the project.
 Boston University CS411 - Software Engineering
-Originally written by: Jiayuan Zheng
+Originally written by: Jiayuan Zheng (11-30-16)
 Edited by: Jennifer Tsui (12-1-16; added '/oauth2callback' and '/youtube' approutes, added
                           authentication json files)
            Jiayuan Zheng (12-2-16; added '/spotifyplaylist' updated '/youtube' approutes)
+           Jennifer Tsui & Jiayuan Zheng (12-4-16; added database, added '/' approute)
 """
 #-----------------------------------------------------------------------------------------------#
-app = Flask(__name__)
 
+app = Flask(__name__)
 
 
 # Client side
@@ -79,18 +78,15 @@ SP_API_VERSION = "v1"
 SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, SP_API_VERSION)
 
 #YouTube URLS
-#YOUTUBE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 YOUTUBE_TOKEN_URL = ""
 YOUTUBE_API_BASE_URL = "GET https://www.googleapis.com/youtube"
-#YOUTUBE_API_URL = "{}/{}".format(YOUTUBE_API_BASE_URL,YT_API_VERSION)
 YOUTUBE_CALLBACK = "callback"
-
+DEVELOPER_KEY = client_secr['web']['developer_key']
 
 # Spotify Server-side Parameters
-
 SP_REDIRECT_URI = "{}:{}/spotify/callback/q".format(CLIENT_SIDE_URL, PORT)
 SP_SCOPE = "playlist-modify-public playlist-modify-private"
 SP_STATE = ""
@@ -99,9 +95,6 @@ SHOW_DIALOG_str = str(SHOW_DIALOG_bool).lower()
 
 #YouTube Server-side Parameters
 YT_REDIRECT_URI = "{}:{}/youtube/callback".format(CLIENT_SIDE_URL,PORT,YOUTUBE_CALLBACK)
-
-
-
 
 sp_auth_query_parameters = {
     "response_type": "code",
@@ -118,9 +111,12 @@ yt_auth_query_parameters = {
 }
 
 
+@app.route("/", methods = ['GET','POST'])
+def index():
+    return render_template("welcome.html")
+
 @app.route("/spotify")
 def spotify():
-    # Authorization
     url_args = "&".join(["{}={}".format(key,urllib.parse.quote(val)) for key,val in sp_auth_query_parameters.items()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
@@ -137,62 +133,44 @@ def callback():
     }
     b = ("{}:{}".format(SP_CLIENT_ID, SP_CLIENT_SECRET))
     base64encoded = base64.b64encode(b.encode('utf-8'))
-    #print(base64encoded)
     new_encode= str(base64encoded)[2:-1]
-    #print(new_encode)
     headers = {"Authorization": "Basic {}".format(new_encode)}
-    #print(headers)
     post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload, headers=headers)
 
-    # Tokens are Returned to Application
     response_data = json.loads(post_request.text)
     access_token = response_data["access_token"]
     refresh_token = response_data["refresh_token"]
     token_type = response_data["token_type"]
     expires_in = response_data["expires_in"]
 
-    #Use the access token to access Spotify API
     authorization_header = {"Authorization":"Bearer {}".format(access_token)}
 
-
-
-    # Get profile data
     user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
     profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
     profile_data = profile_response.json()
 
     user_id = profile_data["id"]
+    session["spotify_id"] = user_id
 
-    #print(profile_data)
-
-    # Get user playlist data
     playlist_api_endpoint = "{}/playlists".format(profile_data["href"])
     playlists_response = requests.get(playlist_api_endpoint, headers=authorization_header)
     playlists = playlists_response.json()
-
 
     p = {}
     p_names = []
 
     for i in range(len(playlists["items"])):
         p[playlists["items"][i]["name"]] = playlists["items"][i]["id"]
-    print(p)
+
 
     for item in p.keys():
-        name = item
         p_names +=[item]
 
-
-
-
     session["playlist_names"] = p_names
-
     session["playlist"] = p
     session["user"] = profile_data["href"]
     session["auth_header"] =  authorization_header
     session["user_id"] = user_id
-
-
 
     return (redirect(url_for("spotifyplaylist")))
 
@@ -204,6 +182,7 @@ def spotifyplaylist():
     if request.method == 'GET':
         return render_template("spotify_playlist.html", playlist_names=playlist_names)
     elif request.method =='POST':
+
         p_name = str(request.form["user_choice"])
         session["playlist_name"]=p_name
         playlist_id = playlist.get(p_name)
@@ -213,23 +192,17 @@ def spotifyplaylist():
         user_playlist_response = requests.get(user_playlist_api_endpoint, headers=auth_header)
         user_playlist = user_playlist_response.json()
 
-
         song = {}
         for j in range(len(user_playlist["items"])):
             song[user_playlist["items"][j]["track"]["name"]] = user_playlist["items"][j]["track"]["artists"][0]["name"]
 
         song_information= []
         for m in range(len(user_playlist["items"])):
-
             song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] ]
-
-        print(song_information)
         session["song_options"] = song_information
 
         return (redirect("/youtube"))
 
-
-DEVELOPER_KEY = "" #add the google api key
 
 @app.route("/youtube", methods = ['GET','POST'])
 def youtube():
@@ -239,8 +212,15 @@ def youtube():
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
+        spotify_id = session.get("spotify_id")
+        db = dataset.connect('sqlite:///mydatabase.db')
+        table = db["user_info"]
         playlist_name = session.get("playlist_name")
+
         http_auth = credentials.authorize(httplib2.Http())
+        print (http_auth)
+
+
         yt_service = discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,http=credentials.authorize(httplib2.Http()))#,http_auth
         playlists_insert_response = yt_service.playlists().insert(
             part="snippet,status",
@@ -255,8 +235,27 @@ def youtube():
             )
         ).execute()
 
-        ytplaylist_id = playlists_insert_response["id"]
+        channels_list = yt_service.channels().list(
+            part="snippet",
+            mine=True
+        ).execute()
 
+        channel = channels_list.get("items",[])
+        chan_id = str([chan["id"] for chan in channel][0])
+
+        if len(table) == 0: # insert first user
+            table.insert(dict(spotify_id=spotify_id, youtube_id=chan_id, counts=1))
+        elif table.find(spotify_id = spotify_id, youtube_id = chan_id) != {}:
+            result = table.find_one(spotify_id = spotify_id)
+            s_id = result["spotify_id"]
+            y_id = result["youtube_id"]
+            old_counts = result["counts"]
+            new_counts = old_counts + 1
+            table.update(dict(spotify_id = s_id, youtube_id = y_id, counts = new_counts),["spotify_id","youtube_id"])
+        else:
+            table.insert(dict(spotify_id=spotify_id, youtube_id = chan_id,counts = 1))
+
+        ytplaylist_id = playlists_insert_response["id"]
         yt_playlist_url = "https://www.youtube.com/playlist?list=" + ytplaylist_id
 
         song_options = session.get("song_options")
@@ -270,14 +269,14 @@ def youtube():
             search_response = youtube.search().list(
                 q=song_options[n],
                 part="id,snippet",
-                maxResults=10).execute()
+                maxResults=5).execute()
+
             for search_result in search_response.get("items",[]):
 
-                if search_result["id"]["kind"] == "youtube#video":
-                    v_id = search_result["id"]["videoId"]
-                    video_ids += [v_id]
-                    break
-
+                    if search_result["id"]["kind"] == "youtube#video":
+                        v_id = search_result["id"]["videoId"]
+                        video_ids += [v_id]
+                        break
 
         for x in video_ids:
             add_video_request = yt_service.playlistItems().insert(
@@ -289,14 +288,9 @@ def youtube():
                             'kind': 'youtube#video',
                             'videoId': x
                         }
-
-
                     }
                 }).execute()
-
-
-    return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url))
-
+        return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url, id = ytplaylist_id))
 
 
 @app.route("/oauth2callback")
@@ -316,18 +310,6 @@ def oauth2callback():
         return redirect(url_for('youtube'))
 
 
-
-'''
-
-storage = Storage("%s-oauth2.json" % sys.argv[0])
-credentials = storage.get()
-
-if credentials is None or credentials.invalid:
-  flags = argparser.parse_args()
-  credentials = run_flow(flow, storage, flags)
-
-'''
 if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.run(debug=True,port=PORT)
-
