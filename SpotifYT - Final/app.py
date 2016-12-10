@@ -309,6 +309,10 @@ def oauth2callback():
         session['credentials'] = credentials.to_json()
         return redirect(url_for('youtube'))
 
+
+
+
+
 '''
 storage = Storage("%s-oauth2.json" % sys.argv[0])
 credentials = storage.get()
