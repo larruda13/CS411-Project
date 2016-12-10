@@ -10,6 +10,7 @@ import httplib2
 import os
 import dataset
 
+
 #-----------------------------------------------------------------------------------------------#
 """
 app.py
@@ -109,10 +110,10 @@ yt_auth_query_parameters = {
     "client_id": YT_CLIENT_ID
 }
 
+
 @app.route("/", methods = ['GET','POST'])
 def index():
     return render_template("welcome.html")
-
 
 @app.route("/spotify")
 def spotify():
@@ -198,7 +199,6 @@ def spotifyplaylist():
         song_information= []
         for m in range(len(user_playlist["items"])):
             song_information += [user_playlist["items"][m]["track"]["name"] + " " + user_playlist["items"][m]["track"]["artists"][0]["name"] ]
-
         session["song_options"] = song_information
 
         return (redirect("/youtube"))
@@ -290,7 +290,6 @@ def youtube():
                         }
                     }
                 }).execute()
-
         return (render_template("youtubeplaylist.html", youtube_url= yt_playlist_url, id = ytplaylist_id))
 
 

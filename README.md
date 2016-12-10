@@ -21,7 +21,6 @@ This web app seeks to automate the process of converting a playlist of songs hel
 
 ### Frontend
 
-* [AngularJS v2.2.0 (TENTATIVE)](https://angularjs.org/)
 * [Bootstrap v3.3.7](http://getbootstrap.com/)
 
 ### Backend
@@ -40,7 +39,23 @@ This web app seeks to automate the process of converting a playlist of songs hel
 
 ## Running the app in SpotifYT - Final
 
-To be completed later.
+Run `app.py`. In terminal, you could do this by typing the following command:
+ 
+```
+$ python app.py
+```
+
+After doing that, you would see something like this:
+
+
+```
+ * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+```
+
+From there, go to `http://127.0.0.1:8080/` in your preferred web browser!
+
 
 ## Running the app in Prototype Code (Part 3)/flask
 
@@ -57,4 +72,4 @@ As of 11/01/16, all our app does is send an API request to Spotify. What it retu
 
 First edit: Jennifer Tsui (11/01/16)
 
-Most recent edit: Jennifer Tsui (12/02/16)
+Most recent edit: Jennifer Tsui (12/07/16)
