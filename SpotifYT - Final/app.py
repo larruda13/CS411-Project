@@ -163,7 +163,6 @@ def callback():
 
 
     for item in p.keys():
-        name = item
         p_names +=[item]
 
     session["playlist_names"] = p_names
@@ -255,8 +254,6 @@ def youtube():
             table.update(dict(spotify_id = s_id, youtube_id = y_id, counts = new_counts),["spotify_id","youtube_id"])
         else:
             table.insert(dict(spotify_id=spotify_id, youtube_id = chan_id,counts = 1))
-
-
 
         ytplaylist_id = playlists_insert_response["id"]
         yt_playlist_url = "https://www.youtube.com/playlist?list=" + ytplaylist_id
